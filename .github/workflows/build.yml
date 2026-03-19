@@ -1,0 +1,37 @@
+name: Build GBA ROM
+
+# Der Workflow startet automatisch, wenn du Code pusht
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    # Wir nutzen einen Standard-Linux-Server von GitHub
+    runs-on: ubuntu-latest
+    
+    # Der Trick: Wir laden das fertige devkitARM Container-Image
+    # Hier ist DEVKITPRO bereits perfekt konfiguriert
+    container: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Code auschecken
+        uses: actions/checkout@v4
+
+      - name: ROM kompilieren
+        run: |
+          # Führt das Makefile im Root-Verzeichnis aus
+          make
+
+      - name: Fertige ROM hochladen (Artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-gba-rom
+          # Sucht nach allen .gba Dateien im Hauptordner und speichert sie
+          path: ./*.gba
+          # Optional: Falls auch eine .elf Datei zum Debuggen generiert wird
+          # path: |
+          #   ./*.gba
+          #   ./*.elf
